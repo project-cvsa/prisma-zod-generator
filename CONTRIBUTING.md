@@ -7,8 +7,6 @@ This package uses [Bun](https://bun.sh/) for development. Get started with:
 ```bash
 bun i              # Install dependencies
 bun run build      # Build the package
-bun link           # Link globally
-bun link @cvsa/prisma-zod  # Link the package
 ```
 
 ## How It Works

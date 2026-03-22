@@ -9,6 +9,6 @@ generator client {
 }
 
 generator zod {
-    provider = "prisma-zod"
+    provider = "bun ../../dist/index.js"
     output   = "./zod"
 }

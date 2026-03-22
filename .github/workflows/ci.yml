@@ -46,12 +46,6 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Link library
-        run: bun link
-
-      - name: Install the package
-        run: bun link @cvsa/prisma-zod
-
       - name: Download build artifacts
         uses: actions/download-artifact@v7
         with:
