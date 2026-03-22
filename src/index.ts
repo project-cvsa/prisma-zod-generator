@@ -1,10 +1,13 @@
-import { generatorHandler } from '@prisma/generator-helper';
-import { generate } from './prisma-generator';
+#!/usr/bin/env node
+import { generatorHandler } from "@prisma/generator-helper";
+import { version } from "../package.json";
+import { runGenerator } from "./generator";
 
 generatorHandler({
-  onManifest: () => ({
-    defaultOutput: './generated',
-    prettyName: 'Prisma Zod Generator',
-  }),
-  onGenerate: generate,
+	onGenerate: runGenerator,
+	onManifest: () => ({
+		version,
+		defaultOutput: "./zod",
+		prettyName: "prisma-zod",
+	}),
 });

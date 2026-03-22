@@ -1,43 +1,37 @@
-#! /usr/bin/env node
+import fs from "node:fs/promises";
+import path from "node:path";
+import type { GeneratorOptions } from "@prisma/generator-helper";
+import { generateModelFile } from "./schema-builder";
+import type { EnumMap } from "./types";
 
-const args = process.argv.slice(2);
-const command = args[0];
+export async function runGenerator(options: GeneratorOptions) {
+	const models = options.dmmf.datamodel.models;
+	const enums = options.dmmf.datamodel.enums;
+	const enumMap: EnumMap = new Map();
+	for (const enumItem of enums) {
+		enumMap.set(
+			enumItem.name,
+			enumItem.values.map((item) => item.name)
+		);
+	}
+	const outputDir = options.generator.output?.value ?? "./zod";
 
-async function main(): Promise<void> {
-  if (command === 'license-check') {
-    const { runLicenseCheck } = await import('./cli/license-check');
-    await runLicenseCheck(args.slice(1));
-    return;
-  }
+	// Prepare directory
+	await fs.rm(outputDir, { recursive: true, force: true });
+	await fs.mkdir(outputDir, { recursive: true });
 
-  if (command === '--help' || command === '-h') {
-    printCliHelp();
-    return;
-  }
+	const exportStatements: string[] = [];
 
-  await import('./index');
-}
+	for (const model of models) {
+		const content = generateModelFile(model, enumMap);
+		const filePath = path.join(outputDir, `${model.name}.ts`);
 
-main().catch((error) => {
-  console.error('❌ Error:', error instanceof Error ? error.message : error);
-  process.exit(1);
-});
+		await fs.writeFile(filePath, content, "utf-8");
+		exportStatements.push(`export * from "./${model.name}";`);
+	}
 
-function printCliHelp(): void {
-  console.log(
-    [
-      'Prisma Zod Generator CLI',
-      '',
-      'Commands:',
-      '  license-check        Validate your PZG Pro license',
-      '',
-      'Examples:',
-      '  npx prisma-zod-generator license-check',
-      '',
-      'As a Prisma generator, include in schema.prisma:',
-      '  generator zod {',
-      '    provider = "prisma-zod-generator"',
-      '  }',
-    ].join('\n'),
-  );
+	if (exportStatements.length > 0) {
+		const indexContent = exportStatements.join("\n");
+		await fs.writeFile(path.join(outputDir, "index.ts"), indexContent, "utf-8");
+	}
 }

@@ -1,119 +1,206 @@
-# Repository Guidelines
+# AGENTS.md - prisma-zod-generator
 
-## Project Structure & Module Organization
-- `src/` — TypeScript source for the generator. Key areas: `variants/`, `generators/`, `utils/`, `config/` (e.g., `src/prisma-generator.ts`, `src/variants/generator.ts`).
-- `tests/` — Vitest test suite (e.g., `tests/prisma-client-esm-config.test.ts`).
-- `prisma/` — Example schemas/utilities used by tests (multi‑provider helpers).
-- `scripts/` — Release and docs tooling.
-- `website/` — Docusaurus documentation site.
-- `.github/` — CI workflows and templates.
+## Project Overview
 
-## Build, Test, and Development Commands
-Use pnpm.
-- `pnpm install` — Install dependencies.
-- `pnpm build` — Compile TypeScript (tsc).
-- `pnpm test` — Run the default Vitest suite.
-- `pnpm test:full` — Broader test pass (multiple suites).
-- `pnpm test:ci` — CI‑oriented tests with coverage.
-- `pnpm lint` — ESLint over `src/` and `tests/` (auto‑fix where safe).
-- `pnpm format` / `pnpm format:check` — Prettier write/check.
-- `pnpm gen-example` — Build and run a local generate cycle.
+This is a Prisma generator plugin that generates Zod schemas from Prisma models. It uses Bun as the runtime and package manager, Biome for formatting, and Turbo for build orchestration.
 
-## Coding Style & Naming Conventions
-- Language: TypeScript; aim for clear, typed APIs.
-- Formatting: Prettier; Linting: ESLint. Run `pnpm format && pnpm lint` before pushing.
-- Indentation: 2 spaces; line endings: LF.
-- Naming: files use kebab‑case (e.g., `prisma-generator.ts`); types/interfaces PascalCase; functions/variables camelCase; prefer named exports.
-- ESM/CJS: Preserve existing module boundaries and index emit patterns.
+## Project Structure
 
-## Testing Guidelines
-- Framework: Vitest. Tests live under `tests/` and end with `.test.ts`.
-- Add focused tests alongside related areas (e.g., ESM index generation in `tests/prisma-client-esm-config.test.ts`).
-- Run `pnpm test` locally; for comprehensive checks use `pnpm test:full` or `pnpm test:ci`.
+```
+prisma-zod-generator/
+├── src/                    # Main source code
+│   ├── index.ts           # Entry point (CLI handler)
+│   ├── generator.ts       # Main generator logic
+│   ├── schema-builder.ts  # Zod schema generation
+│   └── types.ts          # Shared type utilities
+├── tests/                 # Test suites
+│   ├── single-file/      # Single schema file tests
+│   └── multi-file/       # Multi-file/multi-model schema tests
+├── build.ts              # Bun build configuration
+├── biome.json            # Biome formatter/linter config
+├── turbo.json            # Turbo build pipeline config
+└── package.json          # Package manifest
+```
 
-## Commit & Pull Request Guidelines
-- Use Conventional Commits with a scope: `type(scope): subject` (e.g., `fix(variants): include .js in ESM index imports`).
-- Choose `type` intentionally based on impact: `feat`, `fix`, `docs`, `refactor`, `chore`, etc.
-- Keep commits small and atomic; update/add tests with behavior changes.
-- Before push: run and commit `pnpm format` and `pnpm lint` fixes; ensure `pnpm build`, `pnpm test`, and `pnpm format:check` pass.
+## Build, Lint, and Test Commands
 
-### Pull request body files (important)
-- Never commit PR body files to the repository.
-- Use a temporary file outside the repo (e.g., `/tmp/pr-body.md`) when running `gh pr create`:
-  - `gh pr create --base master --head <branch> --title "fix(scope): concise title" --body-file /tmp/pr-body.md`
-- If a body file must be created within the workspace for tooling reasons, it must be placed under a temp path that is ignored by git (e.g., `.tmp/pr-body.md`), and deleted immediately after PR creation.
-- Ensure the PR body contains: Summary, Motivation/Context, Changes, Testing/Validation, Breaking changes, Related issues (e.g., `Closes #123`), and a short checklist.
+### Installation & Setup
+```bash
+bun i              # Install dependencies
+bun link           # Link globally for local development
+bun link @cvsa/prisma-zod  # Link the package
+```
 
-### Commit Workflow (Improved)
-Follow this process to create a high‑quality Conventional Commit:
+### Build Commands
+```bash
+bun run build      # Build with Turbo (runs build:raw)
+bun run build:raw  # Direct Bun build: bun build.ts
+```
 
-1. Decide scope of commit
-   - If staged changes exist (`git diff --cached --name-only` not empty), commit only those.
-   - Otherwise, stage everything with `git add -A`.
+### Lint & Format Commands
+```bash
+bun run format     # Format all files with Biome
+# Biome is configured in biome.json - it handles formatting ONLY (no linting)
+```
 
-2. Detect package manager / scripts
-   - Prefer `pnpm` when available (lockfile or `corepack pnpm --version`).
-   - Inspect `package.json` for `typecheck`, `lint`, and `format` scripts.
+### Test Commands
+```bash
+bun run test                    # Run all tests via Turbo
+bun run test:raw               # Run tests directly: bun test
+bun test                        # Run all tests
+bun test tests/single-file     # Run specific test file
+bun test tests/multi-file      # Run multi-file tests
+```
 
-3. Quality gates (best-effort; skip gracefully if unavailable)
-   - Typecheck: run `pnpm run typecheck` (or `npx tsc --noEmit` if TS project detected).
-   - Lint: run `pnpm run lint` (or `npx eslint . --max-warnings=0` if config exists).
-   - Format: run `pnpm run format` (or `npx prettier -w .` if config exists).
-   - If any gate fails, stop and fix before committing.
+### Running Prisma Generator (Development)
+```bash
+bunx --bun prisma generate     # Generate using local generator
+```
 
-4. Analyze changes to compose a Conventional Commit
-   - Scope: infer from the most common first path segment of changed files.
-   - Type: `feat`/`fix` for `src/` code; `test`, `docs`, `chore`/`build` as appropriate.
-   - Breaking changes: append `!` and add a `BREAKING CHANGE:` footer when applicable.
-   - Subject: concise, imperative (≤ 72 chars). Body: bullets of key changes; link issues (e.g., `Closes #123`).
+---
 
-5. Commit
-   - Write message to a temp file; then `git commit -F <tempfile>`.
+## Code Style Guidelines
 
-Policies
-- Never mention AI/assistants in commits.
-- Keep subject lines ≤ 72 chars; wrap body at ~100 chars.
-- Use Commitizen (`git cz`) if available; otherwise follow above.
+### General
 
-### Pull Request Workflow (Improved)
-Create and push a feature branch, generate a rich PR body, and open a PR with GitHub CLI:
+- **Module System**: ESM only (type: "module" in package.json)
+- **Runtime**: Bun (not Node.js) - use `import.meta.dir`, `Bun.$`, etc.
+- **TypeScript**: Strict mode enabled (see tsconfig.json)
 
-1. Branch strategy
-   - From the default branch (synced to latest `origin/<default>`), create a branch if needed:
-     - Name: `<type>/<scope>-<short-desc-kebab>` (e.g., `feat/api-add-pagination`).
-     - Use `git fetch origin && git rebase origin/<default>` to ensure up-to-date.
+### TypeScript Configuration (tsconfig.json)
+```json
+{
+  "strict": true,
+  "noUncheckedIndexedAccess": true,
+  "noImplicitOverride": true,
+  "moduleResolution": "bundler",
+  "verbatimModuleSyntax": true
+}
+```
 
-2. Commit changes
-   - Run the commit workflow above first to ensure clean, formatted changes.
+### Formatting (Biome - biome.json)
 
-3. Analyze branch changes
-   - Compare against default: `git log --oneline --no-decorate --reverse origin/<default>..HEAD` and
-     `git diff --name-status origin/<default>..HEAD`.
-   - PR title: from the first non-chore Conventional Commit; else from latest commit.
-   - Aggregate commits to build a comprehensive change list.
+| Setting | Value |
+|---------|-------|
+| Indent Style | Tab |
+| Indent Width | 4 |
+| Line Width | 100 |
+| Quote Style | Double |
+| Semicolons | Always |
+| Trailing Commas | ES5 |
 
-4. Generate PR body (markdown)
-   - Include: Summary, Motivation/Context, Changes, Screenshots/Demos (if UI), Testing/Validation, Breaking changes, Related issues (`Closes #123`), Checklist.
-   - Write to a temp file (e.g., `/tmp/pr-body.md` or `.tmp/pr-body.md`).
+### Naming Conventions
 
-5. Push & open PR
-   - `git push -u origin HEAD`
-   - `gh pr create --base <default> --title "<title>" --body-file <tempfile>`
+| Item | Convention | Example |
+|------|------------|---------|
+| Variables/functions | camelCase | `runGenerator`, `outputDir` |
+| Types/Interfaces | PascalCase | `GeneratorOptions`, `Field` |
+| Constants | PascalCase (if exported), camelCase otherwise | `TYPE_MAP` |
+| Files | kebab-case | `schema-builder.ts`, `multi-file/` |
+| Prisma models | PascalCase | `User`, `Post`, `Voicebank` |
+| Zod schemas | PascalCase | `UserSchema`, `PostSchema` |
 
-6. Labels, reviewers, cleanup
-   - Add labels/reviewers as needed.
-   - Delete the temp body file.
+### Import Conventions
 
-Policies
-- PR title follows Conventional Commits; no AI mentions.
+```typescript
+// Node.js built-ins - use node: prefix
+import fs from "node:fs/promises";
+import path from "node:path";
 
-## Windows Execution Policy
-- On Windows hosts, run repository commands through WSL by default.
-- Prefer: `wsl.exe bash -lc "<command>"`.
-- Only use native PowerShell/CMD when the user explicitly asks for it or a task is Windows-only.
-- If WSL is unavailable or broken, stop and ask the user before falling back.
+// External packages
+import { generatorHandler } from "@prisma/generator-helper";
+import type { Field, Model } from "@prisma/dmmf";
 
-## Local Agent Overrides
-- Codex local override file: `AGENTS.override.md` (applied after this file).
-- Claude local override file: `CLAUDE.local.md` (applied after `CLAUDE.md`).
-- Keep local override files untracked (for example via `.git/info/exclude`).
+// Internal modules (relative)
+import { generateModelFile } from "./schema-builder";
+
+// Type-only imports (use type modifier)
+import type { GeneratorOptions } from "@prisma/generator-helper";
+```
+
+### Error Handling
+
+- Use standard try/catch for async operations
+- Prefer async/await over .then() chains
+- Let errors propagate when appropriate (no empty catch blocks)
+
+### Code Patterns
+
+#### Async Generator Function
+```typescript
+export async function runGenerator(options: GeneratorOptions) {
+  // ... implementation
+}
+```
+
+#### Schema Generation Pattern
+```typescript
+export function generateModelFile(model: Model): string {
+  const fieldLines = model.fields
+    .map((field) => {
+      const base = getBaseZodType(field);
+      return base ? `  ${field.name}: ${applyModifiers(base, field)},` : null;
+    })
+    .filter(Boolean)
+    .join("\n");
+
+  return [
+    'import { z } from "zod";',
+    "",
+    `export const ${model.name}Schema = z.object({`,
+    fieldLines,
+    "});",
+  ].join("\n");
+}
+```
+
+#### Test Pattern (Bun)
+```typescript
+import { expect, test, afterAll, beforeAll } from "bun:test";
+
+test("description", async () => {
+  // Test implementation
+  expect(result).toBe(expected);
+});
+```
+
+---
+
+## Key Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `@prisma/generator-helper` | Prisma generator API |
+| `@prisma/dmmf` | Prisma DMMF types |
+| `zod` | Zod schema library (peer dep, v4+) |
+| `@biomejs/biome` | Formatting only |
+| `bun` | Runtime, package manager, test runner |
+
+## Common Workflows
+
+### Making a Change
+1. Edit source in `src/`
+2. Run `bun run build` to compile
+3. Run `bun test` to verify
+4. Run `bun run format` before committing
+
+### Running a Specific Test
+```bash
+bun test tests/single-file/index.test.ts
+```
+
+### Debugging Generated Output
+```bash
+cd tests/single-file
+bunx --bun prisma generate
+# Check prisma/zod/ for generated output
+```
+
+---
+
+## Notes
+
+- Biome is used for formatting ONLY - no ESLint or other linters
+- Turbo runs `build:raw` before `test:raw` automatically
+- Generated Zod schemas use `z.object()` with PascalCase schema names
+- The generator outputs one file per model plus an `index.ts` with exports

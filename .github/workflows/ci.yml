@@ -2,181 +2,72 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, develop]
   pull_request:
-    branches: [master]
+    branches: [master, develop]
 
 jobs:
-  filter:
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    outputs:
-      should_run: ${{ steps.compute.outputs.should_run }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          fetch-depth: 0
-      - name: Decide if CI should run
-        id: compute
-        shell: bash
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          BASE_REF: ${{ github.base_ref }}
-        run: |
-          set -euo pipefail
+          bun-version: 1.3.11
 
-          if [ "$EVENT_NAME" = "pull_request" ] && [ -n "${BASE_REF:-}" ]; then
-            git fetch --no-tags --prune --depth=1 origin "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}"
-            RANGE="origin/${BASE_REF}...HEAD"
-          else
-            PREV="${{ github.event.before }}"
-            CUR="${{ github.sha }}"
-            if [ -z "$PREV" ] || [ "$PREV" = "0000000000000000000000000000000000000000" ]; then
-              RANGE="$CUR~1..$CUR"
-            else
-              RANGE="$PREV..$CUR"
-            fi
-          fi
+      - name: Install dependencies
+        run: bun install
 
-          echo "Using range: $RANGE"
+      - name: Build
+        run: bun run build
 
-          # Collect changed files in range
-          CHANGED=$(git diff --name-only $RANGE || true)
-          echo "Changed files:\n$CHANGED"
-
-          # Determine if all changes are non-code only
-          # Non-code: docs site, markdown/docs, recipes, images/assets, and workflow config
-          DOCS_ONLY=true
-          if [ -n "$CHANGED" ]; then
-            if echo "$CHANGED" | grep -Ev '^(website/|README\.md$|CHANGELOG\.md$|CLAUDE\.md$|LICENSE$|zodSchemas\.png$|recipes/|\.github/workflows/)' >/dev/null 2>&1; then
-              DOCS_ONLY=false
-            fi
-          fi
-
-          # Check commit messages for allowed types or breaking change
-          HAS_ALLOWED=false
-          if git log --format=%s $RANGE | grep -Ei '^(feat|fix|perf|revert|refactor|test|build|ci)(\(|!:|:)' >/dev/null 2>&1; then
-            HAS_ALLOWED=true
-          elif git log --format=%B $RANGE | grep -q 'BREAKING CHANGE'; then
-            HAS_ALLOWED=true
-          fi
-
-          SHOULD_RUN=false
-          if [ "$DOCS_ONLY" = false ] || [ "$HAS_ALLOWED" = true ]; then
-            SHOULD_RUN=true
-          fi
-
-          echo "docs_only=$DOCS_ONLY"
-          echo "has_allowed=$HAS_ALLOWED"
-          echo "should_run=$SHOULD_RUN"
-          echo "should_run=$SHOULD_RUN" >> "$GITHUB_OUTPUT"
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+          retention-days: 1
 
   test:
-    needs: filter
-    if: needs.filter.outputs.should_run == 'true'
+    name: Test
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [20.19.0, 22.x, 24.x]
-
+    needs: build
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.1
+          bun-version: 1.3.11
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install
 
-      - name: Build project
-        run: pnpm run gen-example
+      - name: Download build artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: dist
+          path: dist/
 
-      - name: Run type checking
-        run: pnpm run test:type-check
+      - name: Test
+        run: bun run test
 
-      - name: Run linting
-        run: pnpm run lint || echo "Linting failed but continuing for now"
-        continue-on-error: true
-
-      - name: Run basic tests
-        run: pnpm run test:basic
-
-  package-test:
+  lint:
+    name: Format Check
     runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
 
-      - name: Init Pro submodule
-        env:
-          PRO_KEY: ${{ secrets.SUBMODULE_DEPLOY_KEY }}
-        run: |
-          if [ -z "$PRO_KEY" ]; then
-            echo "SUBMODULE_DEPLOY_KEY secret is not set"
-            exit 1
-          fi
-          if ! command -v ssh-agent >/dev/null; then
-            echo "ssh-agent not available"
-            exit 1
-          fi
-          eval "$(ssh-agent -s)"
-          mkdir -p ~/.ssh
-          ssh_key_path=~/.ssh/id_pro
-          if printf '%s' "$PRO_KEY" | tr -d '\r' | base64 -d > "$ssh_key_path" 2>/dev/null; then
-            echo "Submodule key decoded from base64"
-          else
-            echo "Submodule key not base64-encoded; trying to normalise raw key"
-            printf '%s' "$PRO_KEY" | sed 's/\r//g; s/\\n/\n/g' > "$ssh_key_path"
-          fi
-          chmod 600 "$ssh_key_path"
-          ssh-add "$ssh_key_path"
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git config --global url."git@github.com:".insteadOf "https://github.com/"
-          git submodule sync --recursive
-          git submodule update --init --recursive
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '24.x'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.1
+          bun-version: 1.3.11
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install
 
-      - name: Build and package
-        run: |
-          pnpm run gen-example
-          ./package.sh
-
-      - name: Test package integrity
-        run: |
-          cd package
-          npm pack --dry-run
-
-      - name: Upload package artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: package-build
-          path: package/
-          retention-days: 7
+      - name: Check formatting
+        run: bun run biome:ci

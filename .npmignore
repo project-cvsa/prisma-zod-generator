@@ -1,3 +1,0 @@
-# Ignore generated source directories from npm package
-src/dsrc/
-src/schemas/

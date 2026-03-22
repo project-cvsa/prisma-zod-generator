@@ -1,8 +1,0 @@
-generator zodSingleFile {
-  provider              = "prisma-zod-generator"
-  output                = "./prisma/generated"
-  useMultipleFiles      = false
-  singleFileName        = "schemas.ts"
-  placeSingleFileAtRoot = true
-  config                = "./zod-generator.config.json"
-}

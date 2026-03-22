@@ -1,6 +1,0 @@
-generator zodGranularPerModel {
-  provider         = "prisma-zod-generator"
-  output           = "./prisma/generated"
-  useMultipleFiles = true
-  config           = "./zod-generator.config.json"
-}
