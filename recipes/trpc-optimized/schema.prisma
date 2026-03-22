@@ -1,9 +1,0 @@
-// tRPC optimized (multi-file) generator block
-// Copy into your schema.prisma and adjust paths
-
-generator trpcOptimized {
-  provider         = "prisma-zod-generator"
-  output           = "./src/zod"
-  useMultipleFiles = true
-  config           = "./zod-generator.config.json"
-}

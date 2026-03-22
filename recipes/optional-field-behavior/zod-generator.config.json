@@ -1,7 +1,0 @@
-{
-  "mode": "full",
-  "optionalFieldBehavior": "nullish",
-  "output": "./generated/schemas",
-  "pureModels": true,
-  "pureModelsLean": true
-}
