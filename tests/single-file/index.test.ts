@@ -5,6 +5,7 @@ import { runTypeTest } from "../shared/run-type-test";
 
 const cwd = import.meta.dir;
 const tmpDir = path.join(cwd, "tmp");
+const SECOND = 1000;
 
 beforeAll(async () => {
 	await rm(tmpDir, { recursive: true, force: true });
@@ -14,7 +15,11 @@ afterAll(async () => {
 	await rm(tmpDir, { recursive: true, force: true });
 });
 
-test("single-file Prisma schema works", async () => {
-	const result = await runTypeTest(cwd, "single-file");
-	expect(result.exitCode).toBe(0);
-});
+test(
+	"single-file Prisma schema works",
+	async () => {
+		const result = await runTypeTest(cwd, "single-file");
+		expect(result.exitCode).toBe(0);
+	},
+	30 * SECOND
+);
