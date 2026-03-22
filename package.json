@@ -1,10 +1,13 @@
 {
 	"name": "@cvsa/prisma-zod",
 	"module": "dist/index.js",
-	"version": "3.2.0",
+	"version": "3.2.1",
 	"type": "module",
 	"private": false,
 	"license": "MIT",
+	"repository": {
+		"url": "https://github.com/project-cvsa/prisma-zod-generator"
+	},
 	"bin": {
 		"prisma-zod": "dist/index.js"
 	},
