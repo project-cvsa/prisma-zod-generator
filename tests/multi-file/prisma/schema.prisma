@@ -1,0 +1,14 @@
+datasource db {
+    provider = "postgresql"
+    schemas  = ["core", "meta", "platform", "auth"]
+}
+
+generator client {
+    provider = "prisma-client"
+    output   = "./generated"
+}
+
+generator zod {
+    provider = "prisma-zod"
+    output   = "./zod"
+}
