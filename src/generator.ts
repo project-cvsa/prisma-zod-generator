@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { GeneratorOptions } from "@prisma/generator-helper";
-import { generateModelFile } from "./schema-builder";
+import { generateEnumFile, generateModelFile } from "./schema-builder";
 import type { EnumMap } from "./types";
 
 export async function runGenerator(options: GeneratorOptions) {
@@ -28,6 +28,14 @@ export async function runGenerator(options: GeneratorOptions) {
 
 		await fs.writeFile(filePath, content, "utf-8");
 		exportStatements.push(`export * from "./${model.name}";`);
+	}
+
+	for (const sourceEnum of enums) {
+		const content = generateEnumFile(sourceEnum);
+		const filePath = path.join(outputDir, `${sourceEnum.name}.ts`);
+
+		await fs.writeFile(filePath, content, "utf-8");
+		exportStatements.push(`export * from "./${sourceEnum.name}";`);
 	}
 
 	if (exportStatements.length > 0) {

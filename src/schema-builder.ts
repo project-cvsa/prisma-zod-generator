@@ -1,4 +1,4 @@
-import type { Field, Model } from "@prisma/dmmf";
+import type { Field, Model, DatamodelEnum } from "@prisma/dmmf";
 import type { EnumMap } from "./types";
 
 const TYPE_MAP: Record<string, string> = {
@@ -74,6 +74,16 @@ export function generateModelFile(model: Model, enumMap: EnumMap): string {
 		.join("\n");
 
 	lines.push("", `export const ${model.name}Schema = z.object({`, fieldLines, "});");
+
+	return lines.join("\n");
+}
+
+export function generateEnumFile(soureEnum: DatamodelEnum): string {
+	const lines: string[] = ['import { z } from "zod";'];
+
+	const values = soureEnum.values.map((item) => item.name);
+
+	lines.push("", `export const ${soureEnum.name}Schema = z.enum(${JSON.stringify(values)})`);
 
 	return lines.join("\n");
 }
