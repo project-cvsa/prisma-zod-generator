@@ -1,7 +1,7 @@
 {
 	"name": "@cvsa/prisma-zod",
 	"module": "dist/index.js",
-	"version": "3.4.0",
+	"version": "3.4.1",
 	"type": "module",
 	"private": false,
 	"license": "MIT",
@@ -34,7 +34,7 @@
 	"peerDependencies": {
 		"@prisma/client": ">= 7.0.0",
 		"prisma": ">= 7.0.0",
-		"zod": "^4.3.6"
+		"zod": ">= 4.0.0"
 	},
 	"dependencies": {
 		"@prisma/generator-helper": "^7.5.0"
