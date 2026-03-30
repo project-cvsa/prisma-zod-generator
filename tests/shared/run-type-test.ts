@@ -36,6 +36,6 @@ export async function runTypeTest(cwd: string, testName: string) {
 		await Bun.write(path.join(tmpDir, `Check${modelName}.ts`), getCheckTemplate(modelName));
 	}
 
-	const result = await Bun.$`tsc --noEmit`.cwd(tmpDir);
+	const result = await Bun.$`tsgo --noEmit`.cwd(tmpDir);
 	return { testName, exitCode: result.exitCode };
 }

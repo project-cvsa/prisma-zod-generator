@@ -1,7 +1,7 @@
 {
 	"name": "@cvsa/prisma-zod",
 	"module": "dist/index.js",
-	"version": "3.4.1",
+	"version": "3.4.2",
 	"type": "module",
 	"private": false,
 	"license": "MIT",

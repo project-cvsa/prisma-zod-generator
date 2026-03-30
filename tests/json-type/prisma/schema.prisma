@@ -18,7 +18,8 @@ generator json {
 }
 
 model Log {
-    id   Int  @id
+    id        Int      @id
     /// [LogMetaType]
-    meta Json
+    meta      Json
+    createdAt DateTime @default(now())
 }
