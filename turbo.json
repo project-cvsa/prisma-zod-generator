@@ -10,7 +10,10 @@
 		},
 		"test:raw": {
 			"inputs": ["src/**.ts", "tests/**.ts", "tests/**.prisma"],
-			"dependsOn": ["build:raw"]
+			"dependsOn": ["build:raw", "typecheck:raw"]
+		},
+		"typecheck:raw": {
+			"inputs": ["src/**.ts", "tests/**.ts", "./build.ts"]
 		}
 	}
 }

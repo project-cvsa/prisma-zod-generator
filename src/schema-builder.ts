@@ -1,5 +1,6 @@
 import type { Field, Model, DatamodelEnum } from "@prisma/dmmf";
 import type { EnumMap } from "./types";
+import type { GeneratorOptions } from "@prisma/generator-helper";
 
 const TYPE_MAP: Record<string, string> = {
 	String: "z.string()",
@@ -46,17 +47,38 @@ function applyModifiers(zodType: string, field: Field): string {
 	return result;
 }
 
-function getJsonFieldLine(field: Field): string {
+function getJsonFieldLine(field: Field, useExtendSchema: boolean = false): string {
+	const identifierRegex = /\[([\p{ID_Start}_$][\p{ID_Continue}_$]*)\]/u;
+	const identifierMatchResult = field.documentation?.match(identifierRegex);
+	if (useExtendSchema && identifierMatchResult) {
+		const identifier = identifierMatchResult[1];
+		return `\t${field.name}: ExtendSchema.${identifier}`;
+	}
 	let result = `JsonValueSchema`;
 	if (field.isList) result += ".array()";
 	if (!field.isRequired) result += ".nullable()";
 	return `\t${field.name}: ${result},`;
 }
 
-export function generateModelFile(model: Model, enumMap: EnumMap): string {
+export function generateModelFile(
+	model: Model,
+	enumMap: EnumMap,
+	options: GeneratorOptions
+): string {
 	const hasJsonFields = model.fields.some((f) => f.type === "Json");
+	const extendSchemaFile = (() => {
+		const extendSchemaFile = options.generator.config.extendSchema;
+		if (typeof extendSchemaFile === "string") {
+			return extendSchemaFile;
+		}
+		return null;
+	})();
 
 	const lines: string[] = ['import { z } from "zod";'];
+
+	if (extendSchemaFile) {
+		lines.push(`import * as ExtendSchema from "../${extendSchemaFile}";`);
+	}
 
 	if (hasJsonFields) {
 		lines.push("", JSON_VALUE_SCHEMA_DEFINITION);
@@ -65,7 +87,7 @@ export function generateModelFile(model: Model, enumMap: EnumMap): string {
 	const fieldLines = model.fields
 		.map((field) => {
 			if (field.type === "Json") {
-				return getJsonFieldLine(field);
+				return getJsonFieldLine(field, extendSchemaFile !== null);
 			}
 			const base = getBaseZodType(field, enumMap);
 			return base ? `\t${field.name}: ${applyModifiers(base, field)},` : null;

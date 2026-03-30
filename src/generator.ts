@@ -14,7 +14,7 @@ export async function runGenerator(options: GeneratorOptions) {
 			enumItem.values.map((item) => item.name)
 		);
 	}
-	const outputDir = options.generator.output?.value ?? "./zod";
+	const outputDir = options.generator.output?.value ?? path.join(options.schemaPath, "./zod");
 
 	// Prepare directory
 	await fs.rm(outputDir, { recursive: true, force: true });
@@ -23,7 +23,7 @@ export async function runGenerator(options: GeneratorOptions) {
 	const exportStatements: string[] = [];
 
 	for (const model of models) {
-		const content = generateModelFile(model, enumMap);
+		const content = generateModelFile(model, enumMap, options);
 		const filePath = path.join(outputDir, `${model.name}.ts`);
 
 		await fs.writeFile(filePath, content, "utf-8");

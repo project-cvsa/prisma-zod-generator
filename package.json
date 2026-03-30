@@ -1,7 +1,7 @@
 {
 	"name": "@cvsa/prisma-zod",
 	"module": "dist/index.js",
-	"version": "3.3.0",
+	"version": "3.4.0",
 	"type": "module",
 	"private": false,
 	"license": "MIT",
@@ -18,15 +18,18 @@
 		"test": "bunx --bun turbo test:raw",
 		"test:raw": "bun test",
 		"build": "bunx --bun turbo build:raw",
-		"build:raw": "bun build.ts"
+		"build:raw": "bun build.ts",
+		"typecheck": "bunx --bun turbo typecheck",
+		"typecheck:raw": "bunx --bun tsgo --noEmit"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.8",
 		"@prisma/dmmf": "^7.5.0",
 		"@types/bun": "latest",
 		"prisma": "^7.5.0",
+		"prisma-json-types-generator": "^4.1.1",
 		"turbo": "^2.8.20",
-		"typescript": "^5.9.3"
+		"@typescript/native-preview": "^7.0.0-dev.20260327.2"
 	},
 	"peerDependencies": {
 		"@prisma/client": ">= 7.0.0",

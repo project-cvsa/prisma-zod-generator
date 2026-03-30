@@ -1,0 +1,24 @@
+datasource db {
+    provider = "postgresql"
+}
+
+generator client {
+    provider = "prisma-client"
+    output   = "./generated"
+}
+
+generator zod {
+    provider     = "bun ../../dist/index.js"
+    output       = "./zod"
+    extendSchema = "zod-schema.ts"
+}
+
+generator json {
+    provider = "prisma-json-types-generator"
+}
+
+model Log {
+    id   Int  @id
+    /// [LogMetaType]
+    meta Json
+}

@@ -11,9 +11,10 @@
         "@biomejs/biome": "^2.4.8",
         "@prisma/dmmf": "^7.5.0",
         "@types/bun": "latest",
+        "@typescript/native-preview": "^7.0.0-dev.20260327.2",
         "prisma": "^7.5.0",
+        "prisma-json-types-generator": "^4.1.1",
         "turbo": "^2.8.20",
-        "typescript": "^5.9.3",
       },
       "peerDependencies": {
         "@prisma/client": ">= 7.0.0",
@@ -106,6 +107,22 @@
     "@types/node": ["@types/node@25.5.0", "", { "dependencies": { "undici-types": "~7.18.0" } }, "sha512-jp2P3tQMSxWugkCUKLRPVUpGaL5MVFwF8RDuSRztfwgN1wmqJeMSbKlnEtQqU8UrhTmzEmZdu2I6v2dpp7XIxw=="],
 
     "@types/react": ["@types/react@19.2.14", "", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w=="],
+
+    "@typescript/native-preview": ["@typescript/native-preview@7.0.0-dev.20260330.1", "", { "optionalDependencies": { "@typescript/native-preview-darwin-arm64": "7.0.0-dev.20260330.1", "@typescript/native-preview-darwin-x64": "7.0.0-dev.20260330.1", "@typescript/native-preview-linux-arm": "7.0.0-dev.20260330.1", "@typescript/native-preview-linux-arm64": "7.0.0-dev.20260330.1", "@typescript/native-preview-linux-x64": "7.0.0-dev.20260330.1", "@typescript/native-preview-win32-arm64": "7.0.0-dev.20260330.1", "@typescript/native-preview-win32-x64": "7.0.0-dev.20260330.1" }, "bin": { "tsgo": "bin/tsgo.js" } }, "sha512-tyRn6/PAYpkN35bKz2RPfzV/QAACvle9EYlYyywn/p/qPI5yOBLka0zM/2dGKx+o5vHVQ1gr/iVrgW8w7Wqc8Q=="],
+
+    "@typescript/native-preview-darwin-arm64": ["@typescript/native-preview-darwin-arm64@7.0.0-dev.20260330.1", "", { "os": "darwin", "cpu": "arm64" }, "sha512-jX47OX4svh3/CzSDYd81+kELLP5r0+G7lFGiMAVUNpD+ZLmyh/nrkuuI643pGe8D0i9dTfg/aiZQq6d/00Feog=="],
+
+    "@typescript/native-preview-darwin-x64": ["@typescript/native-preview-darwin-x64@7.0.0-dev.20260330.1", "", { "os": "darwin", "cpu": "x64" }, "sha512-JysPTOMnyje+LkdB3LR+Emnl7hJCvMzUVRcOVJyzmxWOMFNCYPWNK3wDdwuoS6jE5Hii9vInt/xtn3pc+kgb+A=="],
+
+    "@typescript/native-preview-linux-arm": ["@typescript/native-preview-linux-arm@7.0.0-dev.20260330.1", "", { "os": "linux", "cpu": "arm" }, "sha512-rVwd9ZgjR8Le6ItUD/p59LCOYdZbi4DZYavXAMzPPpaJCnmdHwOcJFWc61vricsQljRjVBnunQknHfYABZDq9Q=="],
+
+    "@typescript/native-preview-linux-arm64": ["@typescript/native-preview-linux-arm64@7.0.0-dev.20260330.1", "", { "os": "linux", "cpu": "arm64" }, "sha512-9zlw4ENr6HAUNO+OiWuoQpWUGk4lkqb8NUyXDvTqtlgZGvjyePNVy8OW7KlPuPtCaQS3btV7w4h5X1wlTm2bFA=="],
+
+    "@typescript/native-preview-linux-x64": ["@typescript/native-preview-linux-x64@7.0.0-dev.20260330.1", "", { "os": "linux", "cpu": "x64" }, "sha512-7cB4e12e61xaXgJu6N9rMP+6qdkODVsW8zGjVS5a+cobBCsJSdMnlshfitlL9a+BYWe9HseMqPnLcsaE+t22CQ=="],
+
+    "@typescript/native-preview-win32-arm64": ["@typescript/native-preview-win32-arm64@7.0.0-dev.20260330.1", "", { "os": "win32", "cpu": "arm64" }, "sha512-4wv/FX9F5oAQhzjqwL8KN4O5xgciBy5pT2yLP45xcQahxFUoPnQeF9Pz2x/jwXZSmuh8E1DQWX9evSVGA1MV2A=="],
+
+    "@typescript/native-preview-win32-x64": ["@typescript/native-preview-win32-x64@7.0.0-dev.20260330.1", "", { "os": "win32", "cpu": "x64" }, "sha512-zKDOG/nq1yTx3cjfc19VFO+TYK2+03Wc17pGdD+X+dWTj15LZ2PKk3s4OtT2b8siTcAUn7zmwLsMCWPYO7xXQw=="],
 
     "aws-ssl-profiles": ["aws-ssl-profiles@1.1.2", "", {}, "sha512-NZKeq9AfyQvEeNlN0zSYAaWrmBffJh3IELMZfRpJVWgrpEbtEpnjvzqBPf+mxoI287JohRDoa+/nsfqqiZmF6g=="],
 
@@ -201,6 +218,8 @@
 
     "prisma": ["prisma@7.5.0", "", { "dependencies": { "@prisma/config": "7.5.0", "@prisma/dev": "0.20.0", "@prisma/engines": "7.5.0", "@prisma/studio-core": "0.21.1", "mysql2": "3.15.3", "postgres": "3.4.7" }, "peerDependencies": { "better-sqlite3": ">=9.0.0", "typescript": ">=5.4.0" }, "optionalPeers": ["better-sqlite3", "typescript"], "bin": { "prisma": "build/index.js" } }, "sha512-n30qZpWehaYQzigLjmuPisyEsvOzHt7bZeRyg8gZ5DvJo9FGjD+gNaY59Ns3hlLD5/jZH5GBeftIss0jDbUoLg=="],
 
+    "prisma-json-types-generator": ["prisma-json-types-generator@4.1.1", "", { "dependencies": { "@prisma/generator-helper": "^7.2.0", "semver": "^7.7.3", "try": "^1.0.3", "tslib": "^2.8.1" }, "peerDependencies": { "@prisma/client": "^7.2.0", "prisma": "^7.2.0", "typescript": "^5.9.3" }, "bin": { "prisma-json-types-generator": "index.js" } }, "sha512-oz0MYu1r2Jqu3qOGCEGulz6RjPsECVjyS3ZAz3HEmz0jkKbVkZEwQyksNJm0X5utV1TZCmaG/98EPExN7S22xw=="],
+
     "proper-lockfile": ["proper-lockfile@4.1.2", "", { "dependencies": { "graceful-fs": "^4.2.4", "retry": "^0.12.0", "signal-exit": "^3.0.2" } }, "sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA=="],
 
     "pure-rand": ["pure-rand@6.1.0", "", {}, "sha512-bVWawvoZoBYpp6yIoQtQXHZjmz35RSVHnUOTefl8Vcjr8snTPY1wnpSPMWekcFwbxI6gtmT7rSYPFvz71ldiOA=="],
@@ -223,6 +242,8 @@
 
     "scheduler": ["scheduler@0.27.0", "", {}, "sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q=="],
 
+    "semver": ["semver@7.7.4", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-vFKC2IEtQnVhpT78h1Yp8wzwrf8CM+MzKMHGJZfBtzhZNycRFnXsHk6E5TxIkkMsgNS7mdX3AGB7x2QM2di4lA=="],
+
     "seq-queue": ["seq-queue@0.0.5", "", {}, "sha512-hr3Wtp/GZIc/6DAGPDcV4/9WoZhjrkXsi5B/07QgX8tsdc6ilr7BFM6PM6rbdAX1kFSDYeZGLipIZZKyQP0O5Q=="],
 
     "shebang-command": ["shebang-command@2.0.0", "", { "dependencies": { "shebang-regex": "^3.0.0" } }, "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA=="],
@@ -236,6 +257,10 @@
     "std-env": ["std-env@3.10.0", "", {}, "sha512-5GS12FdOZNliM5mAOxFRg7Ir0pWz8MdpYm6AY6VPkGpbA7ZzmbzNcBJQ0GPvvyWgcY7QAhCgf9Uy89I03faLkg=="],
 
     "tinyexec": ["tinyexec@1.0.4", "", {}, "sha512-u9r3uZC0bdpGOXtlxUIdwf9pkmvhqJdrVCH9fapQtgy/OeTTMZ1nqH7agtvEfmGui6e1XxjcdrlxvxJvc3sMqw=="],
+
+    "try": ["try@1.0.3", "", {}, "sha512-AHA8khVCII6zKyRkyPo6pRwoR9v5jb7QFw6e5avtaVSkxVfaEucYIo06xnwB+pJaEarfYNbs7W3Vq+LZLZiWyA=="],
+
+    "tslib": ["tslib@2.8.1", "", {}, "sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w=="],
 
     "turbo": ["turbo@2.8.20", "", { "optionalDependencies": { "@turbo/darwin-64": "2.8.20", "@turbo/darwin-arm64": "2.8.20", "@turbo/linux-64": "2.8.20", "@turbo/linux-arm64": "2.8.20", "@turbo/windows-64": "2.8.20", "@turbo/windows-arm64": "2.8.20" }, "bin": { "turbo": "bin/turbo" } }, "sha512-Rb4qk5YT8RUwwdXtkLpkVhNEe/lor6+WV7S5tTlLpxSz6MjV5Qi8jGNn4gS6NAvrYGA/rNrE6YUQM85sCZUDbQ=="],
 
