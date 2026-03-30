@@ -52,7 +52,9 @@ function getJsonFieldLine(field: Field, useExtendSchema: boolean = false): strin
 	const identifierMatchResult = field.documentation?.match(identifierRegex);
 	if (useExtendSchema && identifierMatchResult) {
 		const identifier = identifierMatchResult[1];
-		return `\t${field.name}: ExtendSchema.${identifier},`;
+		let result = `ExtendSchema.${identifier}`;
+		if (!field.isRequired) result += ".nullable()";
+		return `\t${field.name}: ${result},`;
 	}
 	let result = `JsonValueSchema`;
 	if (field.isList) result += ".array()";
