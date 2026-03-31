@@ -1,9 +1,9 @@
-import { expect, test, afterAll, beforeAll } from "bun:test";
+import { expect, test, afterAll, beforeAll } from "vitest";
 import { rm } from "node:fs/promises";
 import path from "node:path";
 import { runTypeTest } from "../shared/run-type-test";
 
-const cwd = import.meta.dir;
+const cwd = import.meta.dirname;
 const tmpDir = path.join(cwd, "tmp");
 const SECOND = 1000;
 
@@ -18,8 +18,8 @@ afterAll(async () => {
 test(
 	"single-file Prisma schema works",
 	async () => {
-		const result = await runTypeTest(cwd, "single-file");
-		expect(result.exitCode).toBe(0);
+		const result = await runTypeTest(cwd);
+		expect(result).toBe(0);
 	},
 	30 * SECOND
 );

@@ -2,22 +2,35 @@ import type { Field, Model, DatamodelEnum } from "@prisma/dmmf";
 import type { EnumMap } from "./types";
 import type { GeneratorOptions } from "@prisma/generator-helper";
 
-type DateSchemaOption = "default" | "string" | "number";
+export type DateSchemaOption = "default" | "string" | "number";
+export type BigIntSchemaOption = "default" | "number" | "union" | "string";
 
 function getDateTimeSchema(option: DateSchemaOption): string {
 	switch (option) {
 		case "string":
-			return "z.iso.datetime()";
+			return "z.string()";
 		case "number":
-			return "z.number().int()";
+			return "z.number()";
 		default:
 			return "z.coerce.date()";
 	}
 }
 
+function getBigIntSchema(option: BigIntSchemaOption): string {
+	switch (option) {
+		case "number":
+			return "z.number()";
+		case "string":
+			return "z.string()";
+		case "union":
+			return "z.union([z.bigint(), z.number()])";
+		default:
+			return "z.bigint()";
+	}
+}
+
 const TYPE_MAP: Record<string, string> = {
 	String: "z.string()",
-	BigInt: "z.bigint()",
 	Int: "z.number().int()",
 	Float: "z.number()",
 	Boolean: "z.boolean()",
@@ -71,14 +84,29 @@ function getJsonFieldLine(field: Field, useExtendSchema: boolean = false): strin
 	const identifierMatchResult = field.documentation?.match(identifierRegex);
 	if (useExtendSchema && identifierMatchResult) {
 		const identifier = identifierMatchResult[1];
-		let result = `ExtendSchema.${identifier}`;
-		if (!field.isRequired) result += ".nullable()";
-		return `\t${field.name}: ${result},`;
+		return `\t${field.name}: ${applyModifiers(`ExtendSchema.${identifier}`, field)},`;
 	}
-	let result = `JsonValueSchema`;
-	if (field.isList) result += ".array()";
-	if (!field.isRequired) result += ".nullable()";
-	return `\t${field.name}: ${result},`;
+	return `\t${field.name}: ${applyModifiers(`JsonValueSchema`, field)},`;
+}
+
+function getBigintFieldLine(field: Field, bigintSchema: BigIntSchemaOption): string {
+	const identifierRegex = /\[(string|default|number|union)\]/;
+	const identifierMatchResult = field.documentation?.match(identifierRegex);
+	if (identifierMatchResult?.[1]) {
+		const identifier = identifierMatchResult[1] as BigIntSchemaOption;
+		return `\t${field.name}: ${applyModifiers(getBigIntSchema(identifier), field)},`;
+	}
+	return `\t${field.name}: ${applyModifiers(getBigIntSchema(bigintSchema), field)},`;
+}
+
+function getDateTimeFieldLine(field: Field, dateSchema: DateSchemaOption): string {
+	const identifierRegex = /\[(string|default|number)\]/;
+	const identifierMatchResult = field.documentation?.match(identifierRegex);
+	if (identifierMatchResult?.[1]) {
+		const identifier = identifierMatchResult[1] as DateSchemaOption;
+		return `\t${field.name}: ${applyModifiers(getDateTimeSchema(identifier), field)},`;
+	}
+	return `\t${field.name}: ${applyModifiers(getDateTimeSchema(dateSchema), field)},`;
 }
 
 export function generateModelFile(
@@ -103,6 +131,16 @@ export function generateModelFile(
 		return "default";
 	})();
 
+	const bigintSchema = ((): BigIntSchemaOption => {
+		const config = options.generator.config.bigintSchema;
+		if (!config) return "default";
+		if (typeof config === "object") return "default";
+		if (["string", "number", "union", "default"].includes(config)) {
+			return config as BigIntSchemaOption;
+		}
+		return "default";
+	})();
+
 	const lines: string[] = ['import { z } from "zod";'];
 
 	if (extendSchemaFile) {
@@ -117,6 +155,12 @@ export function generateModelFile(
 		.map((field) => {
 			if (field.type === "Json") {
 				return getJsonFieldLine(field, extendSchemaFile !== null);
+			}
+			if (field.type === "BigInt") {
+				return getBigintFieldLine(field, bigintSchema);
+			}
+			if (field.type === "DateTime") {
+				return getDateTimeFieldLine(field, dateSchema);
 			}
 			const base = getBaseZodType(field, enumMap, dateSchema);
 			return base ? `\t${field.name}: ${applyModifiers(base, field)},` : null;
